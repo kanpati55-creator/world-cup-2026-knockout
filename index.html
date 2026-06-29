@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="2026年W杯サッカー決勝トーナメントの予定と結果を更新できる速報アプリ">
+  <title>2026 W杯 決勝トーナメント速報</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <span></span>
+        </div>
+        <div>
+          <p class="eyebrow">FIFA World Cup 26</p>
+          <h1>決勝トーナメント速報</h1>
+        </div>
+      </div>
+      <div class="status-pill" id="connection-status">手動データ</div>
+    </header>
+
+    <section class="summary-grid" aria-label="大会状況">
+      <article class="metric">
+        <span class="metric-label">次の試合</span>
+        <strong id="next-match">確認中</strong>
+      </article>
+      <article class="metric">
+        <span class="metric-label">進行状況</span>
+        <strong id="progress-count">0 / 32</strong>
+      </article>
+      <article class="metric">
+        <span class="metric-label">最終更新</span>
+        <strong id="last-updated">未更新</strong>
+      </article>
+    </section>
+
+    <section class="toolbar" aria-label="操作">
+      <div class="tabs" role="tablist" aria-label="ラウンドで絞り込み">
+        <button class="tab is-active" type="button" data-round="all">全試合</button>
+        <button class="tab" type="button" data-round="r32">ベスト32</button>
+        <button class="tab" type="button" data-round="r16">ベスト16</button>
+        <button class="tab" type="button" data-round="qf">準々決勝</button>
+        <button class="tab" type="button" data-round="sf">準決勝</button>
+        <button class="tab" type="button" data-round="finals">決勝</button>
+      </div>
+      <div class="toolbar-actions">
+        <button id="refresh-button" class="button button-primary" type="button">今すぐ更新</button>
+        <button id="settings-button" class="button button-secondary" type="button" aria-expanded="false">更新設定</button>
+      </div>
+    </section>
+
+    <section id="settings-panel" class="settings-panel" aria-label="更新設定" hidden>
+      <div class="settings-grid">
+        <label>
+          データ形式
+          <select id="source-type">
+            <option value="apiFootball">API-Football</option>
+            <option value="generic">汎用JSON</option>
+          </select>
+        </label>
+        <label>
+          API URL
+          <input id="api-url" type="url" placeholder="https://v3.football.api-sports.io/fixtures?league=1&season=2026">
+        </label>
+        <label>
+          APIキー
+          <input id="api-key" type="password" autocomplete="off" placeholder="必要な場合だけ入力">
+        </label>
+        <label>
+          自動更新
+          <select id="refresh-interval">
+            <option value="0">オフ</option>
+            <option value="30">30秒ごと</option>
+            <option value="60">1分ごと</option>
+            <option value="300">5分ごと</option>
+          </select>
+        </label>
+      </div>
+      <div class="settings-actions">
+        <button id="save-settings" class="button button-primary" type="button">設定を保存</button>
+        <button id="export-json" class="button button-secondary" type="button">JSONを書き出し</button>
+        <label class="file-button">
+          JSONを読み込み
+          <input id="import-json" type="file" accept="application/json">
+        </label>
+      </div>
+      <p id="settings-message" class="message" aria-live="polite"></p>
+    </section>
+
+    <section class="content-grid">
+      <section class="match-panel" aria-labelledby="matches-title">
+        <div class="section-heading">
+          <h2 id="matches-title">試合予定・結果</h2>
+          <select id="status-filter" aria-label="状態で絞り込み">
+            <option value="all">すべて</option>
+            <option value="live">試合中</option>
+            <option value="scheduled">予定</option>
+            <option value="finished">終了</option>
+          </select>
+        </div>
+        <div id="match-list" class="match-list"></div>
+      </section>
+
+      <aside class="side-panel" aria-label="トーナメント表と編集">
+        <section class="bracket-panel">
+          <div class="section-heading">
+            <h2>トーナメント表</h2>
+          </div>
+          <div id="bracket" class="bracket"></div>
+        </section>
+
+        <section class="manual-panel">
+          <div class="section-heading">
+            <h2>手動更新</h2>
+          </div>
+          <form id="manual-form" class="manual-form">
+            <label>
+              試合
+              <select id="manual-match"></select>
+            </label>
+            <div class="score-grid">
+              <label>
+                ホーム得点
+                <input id="manual-home-score" type="number" min="0" inputmode="numeric">
+              </label>
+              <label>
+                アウェイ得点
+                <input id="manual-away-score" type="number" min="0" inputmode="numeric">
+              </label>
+            </div>
+            <label>
+              状態
+              <select id="manual-status">
+                <option value="scheduled">予定</option>
+                <option value="live">試合中</option>
+                <option value="finished">終了</option>
+              </select>
+            </label>
+            <label>
+              勝者
+              <select id="manual-winner">
+                <option value="">得点から自動判定</option>
+              </select>
+            </label>
+            <label>
+              メモ
+              <input id="manual-note" type="text" placeholder="延長、PK、会場変更など">
+            </label>
+            <button class="button button-primary" type="submit">この内容で更新</button>
+          </form>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <footer>
+    2026年6月28日時点の決勝トーナメント進出チームを初期データに反映済みです。結果速報はAPIまたは手動更新で反映してください。
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
