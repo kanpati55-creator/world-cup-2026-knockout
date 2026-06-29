@@ -456,6 +456,7 @@ select {
 }
 
 .bracket-match {
+  position: relative;
   min-height: 72px;
   padding: 8px;
   border: 1px solid var(--line);
@@ -464,8 +465,11 @@ select {
 }
 
 .bracket-match.has-result {
-  border-color: rgba(13, 107, 71, 0.45);
-  box-shadow: inset 4px 0 0 var(--pitch);
+  border-color: rgba(179, 58, 50, 0.45);
+}
+
+.bracket-match.has-route {
+  box-shadow: inset 4px 0 0 var(--red);
 }
 
 .bracket-match strong {
@@ -478,28 +482,41 @@ select {
 .bracket-match span {
   display: block;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
   font-size: 0.82rem;
   font-weight: 800;
+  line-height: 1.35;
 }
 
 .bracket-team {
+  position: relative;
   margin-top: 4px;
-  padding: 3px 6px;
+  padding: 4px 6px 4px 10px;
   border-radius: 6px;
 }
 
 .bracket-team.is-winner {
-  color: var(--pitch-dark);
-  background: #dff2e8;
-  box-shadow: inset 3px 0 0 var(--pitch);
+  color: #8f1d17;
+  background: #fff1ef;
+  box-shadow: inset 5px 0 0 var(--red);
 }
 
 .bracket-team.is-advanced {
-  color: var(--pitch-dark);
-  background: #eef8f2;
-  box-shadow: inset 3px 0 0 rgba(13, 107, 71, 0.45);
+  color: #8f1d17;
+  background: #fff7f6;
+  box-shadow: inset 5px 0 0 rgba(179, 58, 50, 0.72);
+}
+
+.bracket-team.is-winner::after,
+.bracket-team.is-advanced::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -8px;
+  width: 8px;
+  height: 3px;
+  border-radius: 99px;
+  background: var(--red);
 }
 
 .bracket-team.is-loser {

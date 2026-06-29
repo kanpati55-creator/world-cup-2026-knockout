@@ -384,7 +384,8 @@ function renderBracket() {
     matches.filter((match) => match.roundKey === key).forEach((match) => {
       const result = getMatchResult(match);
       const item = document.createElement("div");
-      item.className = `bracket-match ${result ? "has-result" : ""}`;
+      const hasRoute = result || matchContainsAdvancedTeam(match, advancedTeams);
+      item.className = `bracket-match ${result ? "has-result" : ""} ${hasRoute ? "has-route" : ""}`;
       item.append(createText("strong", `M${match.matchNo}`));
       item.append(createBracketTeamRow(match, "home", result, advancedTeams));
       item.append(createBracketTeamRow(match, "away", result, advancedTeams));
@@ -403,9 +404,52 @@ function createBracketTeamRow(match, side, result, advancedTeams) {
   const isWinner = result?.winner === teamName;
   const isLoser = result?.loser === teamName;
   const isAdvanced = advancedTeams.has(teamName) && !isWinner && !isLoser;
+  const bracketLabel = formatBracketSlotLabel(teamName);
   row.className = `bracket-team ${isWinner ? "is-winner" : ""} ${isLoser ? "is-loser" : ""} ${isAdvanced ? "is-advanced" : ""}`;
-  row.textContent = `${teamName} ${scoreText(score)}`.trim();
+  row.textContent = `${bracketLabel} ${scoreText(score)}`.trim();
   return row;
+}
+
+function formatBracketSlotLabel(label) {
+  const reference = parseReferenceSlot(label);
+  if (!reference) return label || "未定";
+
+  const source = matches.find((match) => match.matchNo === reference.matchNo);
+  if (!source) return label;
+
+  const result = getMatchResult(source);
+  if (result) {
+    return reference.kind === "winner" ? result.winner : result.loser;
+  }
+
+  return `${label}: ${formatCandidateTeams(source)}`;
+}
+
+function formatCandidateTeams(match, depth = 0) {
+  const teams = [match.home, match.away].map((team) => {
+    const reference = parseReferenceSlot(team);
+    if (!reference || depth >= 2) return team || "未定";
+
+    const source = matches.find((item) => item.matchNo === reference.matchNo);
+    const result = source ? getMatchResult(source) : null;
+    if (result) return reference.kind === "winner" ? result.winner : result.loser;
+    return source ? formatCandidateTeams(source, depth + 1) : team;
+  });
+
+  return teams.join(" / ");
+}
+
+function parseReferenceSlot(label) {
+  const match = /^M(\d+)\s*(勝者|敗者)$/.exec(label || "");
+  if (!match) return null;
+  return {
+    matchNo: Number(match[1]),
+    kind: match[2] === "勝者" ? "winner" : "loser"
+  };
+}
+
+function matchContainsAdvancedTeam(match, advancedTeams) {
+  return advancedTeams.has(match.home) || advancedTeams.has(match.away);
 }
 
 function getAdvancedTeams() {
